@@ -35,6 +35,7 @@
 #include "pybind/docstring.h"
 #include "pybind/geometry/geometry.h"
 #include "pybind/geometry/geometry_trampoline.h"
+#include "pybind11/eigen.h"
 
 namespace open3d {
 namespace geometry {
@@ -88,6 +89,14 @@ void pybind_voxelgrid(py::module &m) {
             .def(py::self += py::self)
             .def("get_voxels", &VoxelGrid::GetVoxels,
                  "Returns List of ``Voxel``: Voxels contained in voxel grid. "
+                 "Changes to the voxels returned from this method"
+                 "are not reflected in the voxel grid.")
+            .def("get_indices", &VoxelGrid::GetIndices,
+                 "Returns List of ``indices``: Voxels contained in voxel grid. "
+                 "Changes to the voxels returned from this method"
+                 "are not reflected in the voxel grid.")
+            .def("get_colors", &VoxelGrid::GetColors,
+                 "Returns List of ``colors``: Voxels contained in voxel grid. "
                  "Changes to the voxels returned from this method"
                  "are not reflected in the voxel grid.")
             .def("has_colors", &VoxelGrid::HasColors,
@@ -149,7 +158,7 @@ void pybind_voxelgrid(py::module &m) {
                         "value of the points that fall into it (if the "
                         "PointCloud has colors). The bounds of the created "
                         "VoxelGrid are defined by the given parameters.",
-                        "input"_a, "voxel_size"_a, "min_bound"_a, "max_bound"_a)
+                        "input"_a, "voxel_size"_a, "min_bound"_a, "max_bound"_a, "agg"_a)
             .def_static("create_from_triangle_mesh",
                         &VoxelGrid::CreateFromTriangleMesh,
                         "Creates a VoxelGrid from a given TriangleMesh. No "
@@ -225,7 +234,9 @@ void pybind_voxelgrid(py::module &m) {
              {"min_bound",
               "Minimum boundary point for the VoxelGrid to create."},
              {"max_bound",
-              "Maximum boundary point for the VoxelGrid to create."}});
+              "Maximum boundary point for the VoxelGrid to create."},
+             {"agg",
+              "."}});
     docstring::ClassMethodDocInject(
             m, "VoxelGrid", "create_from_triangle_mesh",
             {{"input", "The input TriangleMesh"},

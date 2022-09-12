@@ -367,5 +367,22 @@ std::vector<Voxel> VoxelGrid::GetVoxels() const {
     return result;
 }
 
+std::vector<Eigen::Vector3i> VoxelGrid::GetIndices() const {
+    std::vector<Eigen::Vector3i> result;
+    result.reserve(voxels_.size());
+    for (const auto &keyval : voxels_) {
+        result.push_back(keyval.second.grid_index_);
+    }
+    return result;
+}
+std::vector<Eigen::Vector3d> VoxelGrid::GetColors() const {
+    std::vector<Eigen::Vector3d> result;
+    result.reserve(voxels_.size());
+    for (const auto &keyval : voxels_) {
+        result.push_back(keyval.second.color_);
+    }
+    return result;
+}
+
 }  // namespace geometry
 }  // namespace open3d

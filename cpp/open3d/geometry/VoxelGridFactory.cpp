@@ -26,6 +26,7 @@
 
 #include <numeric>
 #include <unordered_map>
+#include <stdexcept>
 
 #include "open3d/geometry/IntersectionTest.h"
 #include "open3d/geometry/PointCloud.h"
@@ -64,7 +65,8 @@ std::shared_ptr<VoxelGrid> VoxelGrid::CreateFromPointCloudWithinBounds(
         const PointCloud &input,
         double voxel_size,
         const Eigen::Vector3d &min_bound,
-        const Eigen::Vector3d &max_bound) {
+        const Eigen::Vector3d &max_bound,
+        std::string agg) {
     auto output = std::make_shared<VoxelGrid>();
     if (voxel_size <= 0.0) {
         utility::LogError("voxel_size <= 0.");
@@ -96,7 +98,7 @@ std::shared_ptr<VoxelGrid> VoxelGrid::CreateFromPointCloudWithinBounds(
     for (auto accpoint : voxelindex_to_accpoint) {
         const Eigen::Vector3i &grid_index = accpoint.second.GetVoxelIndex();
         const Eigen::Vector3d &color =
-                has_colors ? accpoint.second.GetAverageColor()
+                has_colors ? accpoint.second.GetAggColor(agg)
                            : Eigen::Vector3d(0, 0, 0);
         output->AddVoxel(geometry::Voxel(grid_index, color));
     }

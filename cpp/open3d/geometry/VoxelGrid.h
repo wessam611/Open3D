@@ -30,6 +30,7 @@
 #include <memory>
 #include <unordered_map>
 #include <vector>
+#include <string>
 
 #include "open3d/geometry/Geometry3D.h"
 #include "open3d/utility/Helper.h"
@@ -216,7 +217,8 @@ public:
             const PointCloud &input,
             double voxel_size,
             const Eigen::Vector3d &min_bound,
-            const Eigen::Vector3d &max_bound);
+            const Eigen::Vector3d &max_bound,
+            std::string agg="avg");
 
     /// Creates a VoxelGrid from a given TriangleMesh. No color information is
     /// converted. The bounds of the created VoxelGrid are computed from the
@@ -245,6 +247,8 @@ public:
     /// Changes to the voxels returned from this method are not reflected in
     /// the voxel grid.
     std::vector<Voxel> GetVoxels() const;
+    std::vector<Eigen::Vector3i> GetIndices() const;
+    std::vector<Eigen::Vector3d> GetColors() const;
 
 public:
     /// Size of the voxel.
@@ -280,6 +284,14 @@ public:
         Add(voxel_index);
         color_ += color;
         num_of_points_++;
+        if (color[0] < min_color_)
+            min_color_ = color[0];
+        if (color[0] > max_color_)
+            max_color_ = color[0];
+        if (num_of_points_ == 1) {
+            min_color_ = color[0];
+            max_color_ = color[0];
+        }
     }
 
     Eigen::Vector3i GetVoxelIndex() const { return voxel_index_; }
@@ -292,10 +304,39 @@ public:
         }
     }
 
+    double GetMaxColor() const {
+        return max_color_;
+    }
+
+    double GetMinColor() const {
+        return min_color_;
+    }
+
+    Eigen::Vector3d GetAggColor(std::string agg) const {
+        if (agg == "avg")
+            return GetAverageColor();
+        else if (agg == "min") {
+            auto c = GetMinColor();
+            return Eigen::Vector3d(c, c, c);
+            }
+        else if (agg == "max") {
+            auto c = GetMaxColor();
+            return Eigen::Vector3d(c, c, c);
+            }
+        else {
+            auto c = GetAverageColor();
+            c[1] = GetMinColor();
+            c[2] = GetMaxColor();
+            return c;
+        }
+    }
+
 public:
     int num_of_points_;
     Eigen::Vector3i voxel_index_;
     Eigen::Vector3d color_;
+    double min_color_;
+    double max_color_;
 };
 
 }  // namespace geometry
